@@ -37,10 +37,10 @@ vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/w
 
 cp $HOME/.ssh/id_rsa* $HOME/github/hc/box/
 
-vagrant ssh -c 'mv /vagrant/id_rsa* ~/.ssh/'
+vagrant ssh -c 'mv /vagrant/id_rsa* ~/.ssh/ ; chmod 600 ~/.ssh/id_rsa*'
 
 # dbg - not working?? Maybe the drupaldb hack made trouble
-vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/docroot ; drush sql-sync --create-db @harris.dev @harris.loc'
+vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/docroot ; drush sql-sync -y --create-db @harris.dev @harris.loc'
 
 
 exit; #dbg
