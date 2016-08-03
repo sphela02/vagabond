@@ -42,18 +42,18 @@ vagrant ssh -c 'mv /vagrant/id_rsa* ~/.ssh/ ; chmod 600 ~/.ssh/id_rsa*'
 # dbg - not working?? Maybe the drupaldb hack made trouble
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/docroot ; drush sql-sync -y --create-db @harris.dev @harris.loc'
 
+echo $LINENO ... RC = $?
+
+vagrant ssh -c 'rsync --archive -e ssh harris.dev@staging-15049.prod.hosting.acquia.com:/mnt/gfs/harris.dev/sites/default/files /var/www/harris/sites/default/' 
 
 exit; #dbg
 
 
 # Frontend build
 
-echo $LINENO ... RC = $?
-
 # dbg ... change local.yml later to use different db userid and host?
 # dbg perl -pi.orig -e 's/DATE/localtime/e'
 
-echo $LINENO ... RC = $?
 
 echo $LINENO ... RC = $?
 
