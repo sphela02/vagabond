@@ -46,7 +46,7 @@ echo $LINENO ... RC = $?
 
 # Setup aliases
 grep vagrant ~/.aliases.bash > $HOME/github/hc/box/.aliases
-vagrant ssh -c 'mv /vagrant/.aliases ~/ ; echo "source ~/.aliases" > ~/.bashrc '
+vagrant ssh -c 'mv /vagrant/.aliases ~/ ; echo "source ~/.aliases" >> ~/.bashrc '
 
 vagrant ssh -c 'rsync --archive -e ssh harris.dev@staging-15049.prod.hosting.acquia.com:/mnt/gfs/harris.dev/sites/default/files /var/www/harris/sites/default/' 
 
