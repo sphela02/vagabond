@@ -12,7 +12,11 @@ fi
 echo dbg ... gitHubUser = $gitHubUser
 
 export gitHubBaseDir=$HOME/github
+if [ $projectInstanceNumber -gt 0 ]; then
+export projectDir=$gitHubBaseDir/hc$projectInstanceNumber.dev
+else
 export projectDir=$gitHubBaseDir/hc.dev
+fi
 
 # Setup github repos
 if [ ! -d "$projectDir" ]; then
@@ -21,6 +25,8 @@ if [ ! -d "$projectDir" ]; then
     cd $projectDir
     git remote add upstream git@github.com:harris-corp-it/hc.git
 fi
+
+# exit
 
 # Setup vagrant to load
 chmod -R 777 $projectDir/box
