@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export gitHubUser=sphela02
-export projectInstanceNumber=0
+export projectInstanceNumber=8 #dbg
 
 ########################################
 if [ "$gitHubUser" == "" ]; then
@@ -12,11 +12,23 @@ fi
 echo dbg ... gitHubUser = $gitHubUser
 
 export gitHubBaseDir=$HOME/github
+
 if [ $projectInstanceNumber -gt 0 ]; then
-export projectDir=$gitHubBaseDir/hc$projectInstanceNumber.dev
+   export projectDir=$gitHubBaseDir/hc$projectInstanceNumber.dev
+
+   # Setup IP address to use for VM
+   tmpNum=`expr 87 + $projectInstanceNumber` 
+   vmInstanceIPAddress=192.168.88.$tmpNum
+
 else
-export projectDir=$gitHubBaseDir/hc.dev
+   export projectDir=$gitHubBaseDir/hc.dev
+
+   # Setup IP address to use for VM
+   vmInstanceIPAddress=192.168.88.88
+
 fi
+
+echo DBG vmInstanceIPAddress = $vmInstanceIPAddress
 
 # Setup github repos
 if [ ! -d "$projectDir" ]; then
@@ -24,9 +36,23 @@ if [ ! -d "$projectDir" ]; then
 
     cd $projectDir
     git remote add upstream git@github.com:harris-corp-it/hc.git
+
+# DBG .. For now, exit after git repo setup, to allow for VM config tooling before launching the vagrant process
+exit #dbg
 fi
 
-# exit
+# Setup vagrant overrides for specific machine instance
+if [ $projectInstanceNumber -gt 0 -a ! -e "$projectDir/box/local.config.yml" ]; then
+    > $projectDir/box/local.config.yml cat <<EOF
+vagrant_hostname: hc$projectInstanceNumber.dev
+vagrant_machine_name: drupalvm$projectInstanceNumber
+vagrant_ip: 192.168.88.$vmInstanceIPAddress
+
+drupal_domain: "hc$projectInstanceNumber.dev"
+EOF
+fi
+
+# exit #dbg
 
 # Setup vagrant to load
 chmod -R 777 $projectDir/box
