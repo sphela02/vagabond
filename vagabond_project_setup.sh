@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export gitHubUser=sphela02
-export projectInstanceNumber=8 #dbg
+export projectInstanceNumber=0 #dbg
 
 ########################################
 if [ "$gitHubUser" == "" ]; then
@@ -36,6 +36,10 @@ if [ ! -d "$projectDir" ]; then
 
     cd $projectDir
     git remote add upstream git@github.com:harris-corp-it/hc.git
+    git remote add cloris   git@github.com:cloris-harris/hc.git
+    git remote add jculver  git@github.com:jculve01/hc.git
+    git remote add kramming git@github.com:kramming/hc.git
+    git remote add sphelan  git@github.com:sphela02/hc.git
 
 # DBG .. For now, exit after git repo setup, to allow for VM config tooling before launching the vagrant process
 exit #dbg
@@ -46,10 +50,12 @@ if [ $projectInstanceNumber -gt 0 -a ! -e "$projectDir/box/local.config.yml" ]; 
     > $projectDir/box/local.config.yml cat <<EOF
 vagrant_hostname: hc$projectInstanceNumber.dev
 vagrant_machine_name: drupalvm$projectInstanceNumber
-vagrant_ip: 192.168.88.$vmInstanceIPAddress
+vagrant_ip: $vmInstanceIPAddress
 
 drupal_domain: "hc$projectInstanceNumber.dev"
 EOF
+echo COMPLETED - box/local.config.yml updated for this machine
+exit #dbg
 fi
 
 # exit #dbg
@@ -60,8 +66,11 @@ cd $projectDir/box
 #dbg ... Tweak Vagrantfile to make it distinct, or use the local override file to do it
 vagrant up
 
+echo VAGRANT BOX NOW UP ... CONFIGURATION NEXT
+exit
+
 vagrant ssh -c "cd /var/www/harris/ ; composer install"
-echo $LINENO ... RC = $?
+echo DBG $LINENO ... RC = $?
 
 vagrant ssh -c "cd /var/www/harris/ ; ./task.sh setup:git-hooks"
 
@@ -69,13 +78,44 @@ vagrant ssh -c "cd /var/www/harris/sites/all/themes/custom/harris ; ./install-no
 
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/sites/all/themes/custom/harris ; nvm use --delete-prefix 0.12.9 ; npm install -g gulp ; npm install -g browser-sync'
 
+vagrant ssh -c 'echo DBG: 73; ls -l /var/www/harris/docroot/sites/default/files/js/'
+
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh frontend:build'
 
+#You should now see a local.yml in the root directory. Update the values in local.yml with local database credentials:
+#
+# local_url: 'http://hc.dev'
+#    db:
+#      username: drupal
+#      name: drupal
+#      host: localhost
+#      port: 3306
+#      password: drupal
+
+
 # DBG ... Hack the local.yml here if you're messing the drupal DB settings
+vagrant ssh -c 'echo DBG: 78; ls -l /var/www/harris/docroot/sites/default/files/js/'
+
+#Who is still getting the jsonpath make error when they build all or make?
+#
+#If so try this:
+#
+#cd /home/vagrant/.drush/cache/download/
+#
+#cp https---storage.googleapis.com-google-code-archive-downloads-v2-code.google.com-jsonpath-jsonpath-0.8.1.php https---jsonpath.googlecode.com-files-jsonpath-0.8.1.php
+# OR ... just download it from here to the cache?
+#  https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsonpath/jsonpath-0.8.1.php
 
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh setup:build:all'
 
+vagrant ssh -c 'echo DBG: 82; ls -l /var/www/harris/docroot/sites/default/files/js/'
+
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh setup:drupal:settings'
+
+vagrant ssh -c 'echo DBG: 86; ls -l /var/www/harris/docroot/sites/default/files/js/'
+
+# Open up permissions on the JS files directory.
+vagrant ssh -c 'chmod 777 /var/www/harris/docroot/sites/default/files/js/'
 
 cp $HOME/.ssh/id_rsa* $projectDir/box/
 
@@ -84,16 +124,38 @@ vagrant ssh -c 'mv /vagrant/id_rsa* ~/.ssh/ ; chmod 600 ~/.ssh/id_rsa*'
 # dbg - not working?? Maybe the drupaldb hack made trouble
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/docroot ; drush sql-sync -y --create-db @harris.dev @harris.loc'
 
-echo $LINENO ... RC = $?
+echo DBG $LINENO ... RC = $?
 
 # Setup aliases
-grep vagrant ~/.aliases.bash > $projectDir/box/.aliases
+echo DBG ... hardcoded vagabond directory at line 102, we should use \$0 to derive this
+grep vagrant ~/github/vagabond/aliases.vagrant.bash > $projectDir/box/.aliases
 vagrant ssh -c 'mv /vagrant/.aliases ~/ ; echo "source ~/.aliases" >> ~/.bashrc '
 
-vagrant ssh -c 'rsync --archive -e ssh harris.dev@staging-15049.prod.hosting.acquia.com:/mnt/gfs/harris.dev/sites/default/files /var/www/harris/sites/default/' 
+#If your local site appears unstyled or if the css and javascript are not working, you may need to create a files directory. The files directory is used to serve css, javascript, and uploaded image files but has been ommited from the repository in /var/www/harris/.gitignore
+#
+## Ignore paths that contain user-generated content.
+#sites/*/files
+#sites/*/private
+#
+#To create the files directory and attach the css and javascript to the site:
+#
+#    change to the project root directory cd /var/www/harris/
+#    create a files directory mkdir sites/default/files/
+#    change to the harris directory cd sites/all/themes/custom/harris/
+#    run gulp
+#    return to the docroot directory cd ../../../../../docroot/
+#    and clear the cache drush cc all
+#    refresh the site
+
+vagrant ssh -c 'rsync --archive -v -e ssh harris.dev@staging-15049.prod.hosting.acquia.com:/mnt/gfs/harris.dev/sites/default/files /var/www/harris/sites/default/'
+echo DBG ... RSYNC-RC $?
+
+vagrant ssh -c 'echo DBG: 107; ls -l /var/www/harris/docroot/sites/default/files/js/'
+
+# Open up permissions on the JS files directory.
+vagrant ssh -c 'chmod 777 /var/www/harris/docroot/sites/default/files/js/'
 
 exit; #dbg
-
 
 # Frontend build
 
