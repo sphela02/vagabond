@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export gitHubUser=sphela02
-export projectInstanceNumber=0 #dbg
+export projectInstanceNumber=5 #dbg
 
 ########################################
 if [ "$gitHubUser" == "" ]; then
@@ -37,9 +37,9 @@ if [ ! -d "$projectDir" ]; then
     cd $projectDir
     git remote add upstream git@github.com:harris-corp-it/hc.git
     git remote add cloris   git@github.com:cloris-harris/hc.git
-    git remote add jculver  git@github.com:jculve01/hc.git
+    git remote add jculve01  git@github.com:jculve01/hc.git
     git remote add kramming git@github.com:kramming/hc.git
-    git remote add sphelan  git@github.com:sphela02/hc.git
+    git remote add sphela02  git@github.com:sphela02/hc.git
 
 # DBG .. For now, exit after git repo setup, to allow for VM config tooling before launching the vagrant process
 exit #dbg
@@ -67,20 +67,13 @@ cd $projectDir/box
 vagrant up
 
 echo VAGRANT BOX NOW UP ... CONFIGURATION NEXT
-exit
 
-vagrant ssh -c "cd /var/www/harris/ ; composer install"
-echo DBG $LINENO ... RC = $?
+# Set up SSH Keys for later
+cp $HOME/.ssh/id_rsa* $projectDir/box/
+vagrant ssh -c 'mv /vagrant/id_rsa* ~/.ssh/ ; chmod 600 ~/.ssh/id_rsa*'
 
-vagrant ssh -c "cd /var/www/harris/ ; ./task.sh setup:git-hooks"
-
-vagrant ssh -c "cd /var/www/harris/sites/all/themes/custom/harris ; ./install-node.sh 0.12.9"
-
-vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris/sites/all/themes/custom/harris ; nvm use --delete-prefix 0.12.9 ; npm install -g gulp ; npm install -g browser-sync'
-
-vagrant ssh -c 'echo DBG: 73; ls -l /var/www/harris/docroot/sites/default/files/js/'
-
-vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh frontend:build'
+# Start configuring the box internally
+vagrant ssh -c "/vagrant/configure_vm.sh"
 
 #You should now see a local.yml in the root directory. Update the values in local.yml with local database credentials:
 #
@@ -92,12 +85,10 @@ vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/w
 #      port: 3306
 #      password: drupal
 
+exit
 
 # DBG ... Hack the local.yml here if you're messing the drupal DB settings
-vagrant ssh -c 'echo DBG: 78; ls -l /var/www/harris/docroot/sites/default/files/js/'
 
-#Who is still getting the jsonpath make error when they build all or make?
-#
 #If so try this:
 #
 #cd /home/vagrant/.drush/cache/download/
@@ -106,8 +97,6 @@ vagrant ssh -c 'echo DBG: 78; ls -l /var/www/harris/docroot/sites/default/files/
 # OR ... just download it from here to the cache?
 #  https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/jsonpath/jsonpath-0.8.1.php
 
-vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh setup:build:all'
-
 vagrant ssh -c 'echo DBG: 82; ls -l /var/www/harris/docroot/sites/default/files/js/'
 
 vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/www/harris ; ./task.sh setup:drupal:settings'
@@ -115,7 +104,7 @@ vagrant ssh -c 'export NVM_DIR=/home/vagrant/.nvm; . $NVM_DIR/nvm.sh ; cd /var/w
 vagrant ssh -c 'echo DBG: 86; ls -l /var/www/harris/docroot/sites/default/files/js/'
 
 # Open up permissions on the JS files directory.
-vagrant ssh -c 'chmod 777 /var/www/harris/docroot/sites/default/files/js/'
+vagrant ssh -c 'chmod -R 777 /var/www/harris/docroot/sites/default/files/js/'
 
 cp $HOME/.ssh/id_rsa* $projectDir/box/
 
