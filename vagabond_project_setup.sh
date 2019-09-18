@@ -1,8 +1,8 @@
 #!/bin/bash
 
 export gitHubUser=sphela02
-export projectInstanceNumber=6 #dbg
-export gitBranch=hc-000-drupal-vm-update-4.9.2 #dbg
+export projectInstanceNumber=7 #dbg
+#export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
 
 ########################################
 if [ "$gitHubUser" == "" ]; then
