@@ -4,6 +4,7 @@ export gitHubUser=sphela02
 export projectInstanceNumber=7 #dbg
 export projectBaseDir=$HOME/github
 #export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
+export vagabondBaseDir=`dirname $0`
 
 ########################################
 if [ "$gitHubUser" == "" ]; then
@@ -174,16 +175,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # Setup aliases
-echo DBG ... hardcoded vagabond directory at line 102, we should use \$0 to derive this
-grep vagrant ~/github/vagabond/aliases.vagrant.bash > $projectDir/box/.aliases
+grep vagrant $vagabondBaseDir/aliases.vagrant.bash > $projectDir/box/.aliases
 vagrant ssh -c 'mv /vagrant/.aliases ~/ ; echo "source ~/.aliases" >> ~/.bashrc '
 if [ $? -ne 0 ]; then
     exit
 fi
 
 # Setup history
-echo DBG ... hardcoded vagabond directory at line 102, we should use \$0 to derive this
-grep vagrant ~/github/vagabond/history.vagrant.bash > $projectDir/box/.bash_history
+grep vagrant $vagabondBaseDir/history.vagrant.bash > $projectDir/box/.bash_history
 vagrant ssh -c 'mv /vagrant/.bash_history ~/'
 if [ $? -ne 0 ]; then
     exit
