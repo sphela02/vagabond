@@ -125,12 +125,37 @@ fi
 #      port: 3306
 #      password: drupal
 
+###
+### Force write local.yml
+> $projectDir/local.yml cat <<EOF2 
+# This is used for configuring your local $base_url.
+local_url: 'http://$vmHostName'
+
+# Database Credentials. By default, these match Travis CI creds.
+# Note, these should match credentials in sites/default/local.settings.php!
+# To re-generate local.settings.php, run ./task.sh setup:drupal:settings
+db:
+  username: drupal
+  name: drupal
+  host: localhost
+  port: 3306
+  password: 'drupal'
+
+# Drupal Account Credentials. These are used for installing Drupal.
+drupal:
+  account.name: admin
+  account.password: admin
+  account.mail: no-reply@acquia.com
+
+EOF2
+
 cat $projectDir/local.yml
 echo DOES local.yml look OK [y/N]?
 read localYamlAnswer
 if [ "$localYamlAnswer" != "y" -a "$localYamlAnswer" != "Y" ]; then
     # Local YML not OK, stop
     echo PLEASE FIX LOCAL.YML AND TRY AGAIN
+    echo vi $projectDir/local.yml
     exit
 fi
 
