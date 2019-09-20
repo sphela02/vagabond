@@ -2,6 +2,7 @@
 
 export gitHubUser=sphela02
 export projectInstanceNumber=7 #dbg
+export projectBaseDir=$HOME/github
 #export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
 
 ########################################
@@ -14,17 +15,15 @@ export vmHostName=hc$projectInstanceNumber.test
 
 echo dbg ... gitHubUser = $gitHubUser
 
-export gitHubBaseDir=$HOME/github
-
 if [ $projectInstanceNumber -gt 0 ]; then
-   export projectDir=$gitHubBaseDir/$vmHostName
+   export projectDir=$projectBaseDir/$vmHostName
 
    # Setup IP address to use for VM
    tmpNum=`expr 87 + $projectInstanceNumber` 
    vmInstanceIPAddress=192.168.88.$tmpNum
 
 else
-   export projectDir=$gitHubBaseDir/hc
+   export projectDir=$projectBaseDir/hc
 
    # Setup IP address to use for VM
    vmInstanceIPAddress=192.168.88.88
