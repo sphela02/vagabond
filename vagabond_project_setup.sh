@@ -181,6 +181,14 @@ if [ $? -ne 0 ]; then
     exit
 fi
 
+# Setup history
+echo DBG ... hardcoded vagabond directory at line 102, we should use \$0 to derive this
+grep vagrant ~/github/vagabond/history.vagrant.bash > $projectDir/box/.bash_history
+vagrant ssh -c 'mv /vagrant/.bash_history ~/'
+if [ $? -ne 0 ]; then
+    exit
+fi
+
 #If your local site appears unstyled or if the css and javascript are not working, you may need to create a files directory. The files directory is used to serve css, javascript, and uploaded image files but has been ommited from the repository in /var/www/harris/.gitignore
 #
 ## Ignore paths that contain user-generated content.
