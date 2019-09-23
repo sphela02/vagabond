@@ -1,15 +1,24 @@
 #!/bin/bash
 
-export gitHubUser=sphela02
+export defaultGitHubUser=sphela02
 export projectInstanceNumber=7 #dbg
 export projectBaseDir=$HOME/github
 #export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
 export vagabondBaseDir=`dirname $0`
 
 ########################################
-if [ "$gitHubUser" == "" ]; then
+if [ "$defaultGitHubUser" == "" ]; then
     export whoami=`/usr/bin/whoami`
-    export gitHubUser=$whoami
+    export defaultGitHubUser=$whoami
+fi
+
+echo Enter Github User [$defaultGitHubUser]?
+read localGithubUserAnswer
+if [ "$localGithubUserAnswer" != "" ]; then
+    # User entered a specific github user
+    export githubUser=$localGithubUserAnswer
+else
+    export githubUser=$defaultGitHubUser
 fi
 
 export vmHostName=hc$projectInstanceNumber.test
