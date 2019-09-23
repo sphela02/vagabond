@@ -16,9 +16,9 @@ echo Enter Github User [$defaultGitHubUser]?
 read localGithubUserAnswer
 if [ "$localGithubUserAnswer" != "" ]; then
     # User entered a specific github user
-    export githubUser=$localGithubUserAnswer
+    export gitHubUser=$localGithubUserAnswer
 else
-    export githubUser=$defaultGitHubUser
+    export gitHubUser=$defaultGitHubUser
 fi
 
 echo Enter Instance Number [$defaultProjectInstanceNumber]?
@@ -42,7 +42,7 @@ export projectDir=$projectBaseDir/$vmHostName
 tmpNum=`expr 87 + $projectInstanceNumber` 
 vmInstanceIPAddress=192.168.88.$tmpNum
 
-echo SETTING UP HOST $vmHostName at $vmInstanceIPAddress into $projectDir
+echo SETTING UP USER $gitHubUser with HOST $vmHostName at $vmInstanceIPAddress into $projectDir
 
 # Setup github repos
 if [ ! -d "$projectDir" ]; then
