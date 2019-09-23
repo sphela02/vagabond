@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export defaultGitHubUser=sphela02
-export projectInstanceNumber=7 #dbg
+export defaultProjectInstanceNumber=1
 export projectBaseDir=$HOME/github
 #export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
 export vagabondBaseDir=`dirname $0`
@@ -21,26 +21,28 @@ else
     export githubUser=$defaultGitHubUser
 fi
 
-export vmHostName=hc$projectInstanceNumber.test
-
-echo dbg ... gitHubUser = $gitHubUser
-
-if [ $projectInstanceNumber -gt 0 ]; then
-   export projectDir=$projectBaseDir/$vmHostName
-
-   # Setup IP address to use for VM
-   tmpNum=`expr 87 + $projectInstanceNumber` 
-   vmInstanceIPAddress=192.168.88.$tmpNum
-
+echo Enter Instance Number [$defaultProjectInstanceNumber]?
+read localProjectInstanceNumber
+if [ "$localProjectInstanceNumber" != "" ]; then
+    # User entered a specific github user
+    export projectInstanceNumber=$localProjectInstanceNumber
 else
-   export projectDir=$projectBaseDir/hc
-
-   # Setup IP address to use for VM
-   vmInstanceIPAddress=192.168.88.88
-
+    export projectInstanceNumber=$defaultProjectInstanceNumber
 fi
 
-echo DBG vmInstanceIPAddress = $vmInstanceIPAddress
+if [ $projectInstanceNumber -gt 1 ]; then
+    export vmHostName=hc$projectInstanceNumber.test
+else
+    export vmHostName=hc.test
+fi
+
+export projectDir=$projectBaseDir/$vmHostName
+
+# Setup IP address to use for VM
+tmpNum=`expr 87 + $projectInstanceNumber` 
+vmInstanceIPAddress=192.168.88.$tmpNum
+
+echo SETTING UP HOST $vmHostName at $vmInstanceIPAddress into $projectDir
 
 # Setup github repos
 if [ ! -d "$projectDir" ]; then
