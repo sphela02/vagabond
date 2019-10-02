@@ -1,12 +1,20 @@
 #!/bin/bash
 
-export defaultGitHubUser=sphela02
-export defaultProjectInstanceNumber=1
+# export defaultGitHubUser=sphela02
+# export defaultProjectInstanceNumber=1
 export projectBaseDir=$HOME/github
 #export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
 export vagabondBaseDir=`dirname $0`
 
 ########################################
+source $vagabondBaseDir/kv-bash/kv-bash
+
+# If no hardcoded default github user, look in the saved variables
+if [ "$defaultGitHubUser" == "" ]; then
+    export defaultGitHubUser=`kvget vagabond_github_user`
+fi
+
+# If no default github user, use whoami
 if [ "$defaultGitHubUser" == "" ]; then
     export whoami=`/usr/bin/whoami`
     export defaultGitHubUser=$whoami
@@ -21,6 +29,14 @@ else
     export gitHubUser=$defaultGitHubUser
 fi
 
+### Save the github user for future uses.
+kvset vagabond_github_user $gitHubUser
+
+# If no hardcoded default project instance number, look in the saved variables
+if [ "$defaultProjectInstanceNumber" == "" ]; then
+    export defaultProjectInstanceNumber=`kvget vagabond_project_instance_number`
+fi
+
 echo Enter Instance Number [$defaultProjectInstanceNumber]?
 read localProjectInstanceNumber
 if [ "$localProjectInstanceNumber" != "" ]; then
@@ -29,6 +45,9 @@ if [ "$localProjectInstanceNumber" != "" ]; then
 else
     export projectInstanceNumber=$defaultProjectInstanceNumber
 fi
+
+### Save the project instance number for future uses.
+kvset vagabond_project_instance_number $projectInstanceNumber
 
 if [ $projectInstanceNumber -gt 1 ]; then
     export vmHostName=hc$projectInstanceNumber.test
