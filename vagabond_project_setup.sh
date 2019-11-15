@@ -3,7 +3,7 @@
 # export defaultGitHubUser=sphela02
 # export defaultProjectInstanceNumber=1
 export projectBaseDir=$HOME/github
-#export gitBranch=hc-000-drupal-vm-update-4.9.2-PR #dbg
+# export gitBranch=hc-000-drupal-vm-501-pr #dbg
 export vagabondBaseDir=`dirname $0`
 
 ########################################
@@ -40,10 +40,14 @@ fi
 echo Enter Instance Number [$defaultProjectInstanceNumber]?
 read localProjectInstanceNumber
 if [ "$localProjectInstanceNumber" != "" ]; then
-    # User entered a specific github user
+    # User entered a specific instance number
     export projectInstanceNumber=$localProjectInstanceNumber
 else
     export projectInstanceNumber=$defaultProjectInstanceNumber
+fi
+
+if [ $projectInstanceNumber -eq 0 ]; then
+    export projectInstanceNumber=1;
 fi
 
 ### Save the project instance number for future uses.
@@ -237,7 +241,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Setup history
-grep vagrant $vagabondBaseDir/history.vagrant.bash > $projectDir/box/.bash_history
+cp $vagabondBaseDir/history.vagrant.bash $projectDir/box/.bash_history
 vagrant ssh -c 'mv /vagrant/.bash_history ~/'
 if [ $? -ne 0 ]; then
     exit
