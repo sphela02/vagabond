@@ -3,7 +3,7 @@
 # export defaultGitHubUser=sphela02
 # export defaultProjectInstanceNumber=1
 export projectBaseDir=$HOME/github
-# export gitBranch=hc-000-drupal-vm-501-pr #dbg
+#export gitBranch=jculve01/hc-1185-add-chalk-module-manually #dbg
 export vagabondBaseDir=`dirname $0`
 
 ########################################
@@ -78,12 +78,34 @@ if [ ! -d "$projectDir" ]; then
     git remote add kramming git@github.com:kramming/hc.git
     git remote add sphela02  git@github.com:sphela02/hc.git
 
-# DBG .. For now, exit after git repo setup, to allow for VM config tooling before launching the vagrant process
-exit #dbg
+    # Set to track against upstream/develop
+    git remote update upstream
+    git branch --set-upstream-to=upstream/develop
+    git pull
+
+    echo
+    cd $projectDir
+    git status
+    cd -
+    echo DOES git repo look OK [y/N]?
+    read localgitHubOKAnswer
+    if [ "$localgitHubOKAnswer" != "y" -a "$localgitHubOKAnswer" != "Y" ]; then
+        # github repo not OK, stop
+        echo PLEASE FIX GITHUB REPO AND TRY AGAIN
+        exit
+    fi
+
 fi
 
 if [ "$gitBranch" != "" ]; then
     cd $projectDir
+
+    # Is this branch from another repo?
+    if [[ "$gitBranch" =~ ^.*/.*$ ]]; then
+        remoteRepoName=`echo $gitBranch | cut -d "/" -f 1`
+        git remote update $remoteRepoName
+    fi # end if repo/branch
+
     git checkout $gitBranch
     if [ $? -ne 0 ]; then
         exit
